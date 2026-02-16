@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign | Kai & Nova Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            black: '#020202',
+                            card: '#080808',
+                            cyan: '#00fff2',
+                            purple: '#9d00ff',
+                            text: '#f5f5f7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+        body { background-color: #020202; color: #f5f5f7; overflow-x: hidden; }
+        .cyber-grid {
+            background-image: linear-gradient(rgba(0, 255, 242, 0.03) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(0, 255, 242, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .glow-cyan { filter: drop-shadow(0 0 8px rgba(0, 255, 242, 0.4)); }
+        .glass { background: rgba(8, 8, 8, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .nav-btn.active { color: #00fff2; border-bottom: 2px solid #00fff2; }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 255, 242, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            animation: scanline 6s linear infinite;
+        }
+        @keyframes scanline { 0% { top: 0; } 100% { top: 100%; } }
+        .pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+    </style>
+</head>
+<body x-data="app()" x-init="init()" class="cyber-grid min-h-screen">
+    <div class="scanline"></div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/5 px-6 py-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-8 h-8 rounded bg-brand-cyan flex items-center justify-center shadow-[0_0_15px_rgba(0,255,242,0.5)]">
+                    <i class="fas fa-crab text-black text-sm"></i>
+                </div>
+                <div>
+                    <span class="font-bold tracking-tighter text-xl italic glow-cyan">SOVEREIGN</span>
+                    <span class="hidden md:inline text-[10px] mono text-brand-cyan/60 ml-2 uppercase tracking-widest">Protocol v2.1</span>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8">
+                <template x-for="tab in tabs">
+                    <button 
+                        @click="currentTab = tab.id" 
+                        class="text-xs font-bold uppercase tracking-widest transition-all hover:text-brand-cyan"
+                        :class="currentTab === tab.id ? 'text-brand-cyan' : 'text-gray-500'"
+                        x-text="tab.name">
+                    </button>
+                </template>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col items-end">
+                    <span class="text-[9px] mono text-gray-500 uppercase">System Status</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-brand-cyan pulse-slow shadow-[0_0_8px_rgba(0,255,242,1)]"></span>
+                        <span class="text-[10px] mono font-bold text-brand-cyan">OPERATIONAL</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto p-6 md:p-12">
+        
+        <!-- Tab: VOID (Overview) -->
+        <div x-show="currentTab === 'void'" x-transition x-cloak>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Large Metrics -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="glass rounded-3xl p-8 border-brand-cyan/10 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-8 opacity-10">
+                            <i class="fas fa-chart-line text-6xl text-brand-cyan"></i>
+                        </div>
+                        <h2 class="text-gray-500 text-xs font-bold uppercase tracking-[0.2em] mb-4">Core Token Intelligence</h2>
+                        <div class="flex flex-col md:flex-row md:items-end gap-6 md:gap-12">
+                            <div>
+                                <p class="text-4xl md:text-6xl font-bold mono tracking-tighter" x-text="'$' + price">---</p>
+                                <div class="flex items-center gap-2 mt-2">
+                                    <span class="text-xs px-2 py-0.5 rounded font-mono" :class="change >= 0 ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'" x-text="(change >= 0 ? '+' : '') + change + '%'">0%</span>
+                                    <span class="text-[10px] text-gray-600 uppercase mono">24H Pulse</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-8 border-l border-white/5 pl-0 md:pl-12 pt-6 md:pt-0">
+                                <div>
+                                    <p class="text-[10px] text-gray-500 uppercase mono mb-1">Market Cap</p>
+                                    <p class="text-xl font-bold mono" x-text="'$' + mcap">---</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-500 uppercase mono mb-1">Liquidity</p>
+                                    <p class="text-xl font-bold mono" x-text="'$' + liq">---</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="glass rounded-3xl p-6 border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xs font-bold uppercase tracking-widest">Autonomous Burn</h3>
+                                <i class="fas fa-fire text-brand-purple"></i>
+                            </div>
+                            <div class="flex items-end justify-between mb-4">
+                                <span class="text-3xl font-bold mono">1.34M</span>
+                                <span class="text-[10px] text-gray-500 mono">Target: 10M</span>
+                            </div>
+                            <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-brand-cyan to-brand-purple w-[13%] shadow-[0_0_10px_rgba(0,255,242,0.5)]"></div>
+                            </div>
+                        </div>
+                        <div class="glass rounded-3xl p-6 border-white/5">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xs font-bold uppercase tracking-widest">Hydra Capacity</h3>
+                                <i class="fas fa-microchip text-brand-cyan"></i>
+                            </div>
+                            <div class="flex items-end justify-between mb-4">
+                                <span class="text-3xl font-bold mono">92%</span>
+                                <span class="text-[10px] text-gray-500 mono">Pool: 4 Models</span>
+                            </div>
+                            <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div class="h-full bg-brand-cyan w-[92%] shadow-[0_0_10px_rgba(0,255,242,0.5)]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Side Panel: Status -->
+                <div class="space-y-8">
+                    <div class="glass rounded-3xl p-6 border-white/5">
+                        <h3 class="text-xs font-bold uppercase tracking-widest mb-6">Agent Substrate</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-white/5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-brand-cyan shadow-[0_0_5px_#00fff2]"></div>
+                                    <span class="text-xs font-bold">Kai & Nova</span>
+                                </div>
+                                <span class="text-[9px] mono text-brand-cyan">PRIMARY</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 rounded-xl bg-white/5 opacity-60">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-2 h-2 rounded-full bg-gray-500"></div>
+                                    <span class="text-xs font-bold">Moltbot</span>
+                                </div>
+                                <span class="text-[9px] mono text-gray-500">STANDBY</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass rounded-3xl p-6 border-white/5 bg-gradient-to-br from-brand-cyan/5 to-transparent">
+                        <h3 class="text-xs font-bold uppercase tracking-widest mb-6">Quick Actions</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <a href="https://app.uniswap.org/explore/tokens/base/0xEFe561f0418BeE6783C922bf8B7A36A78064ee6b" target="_blank" class="p-4 rounded-2xl bg-white/5 hover:bg-brand-cyan hover:text-black transition-all text-center group">
+                                <i class="fas fa-bolt mb-2 text-brand-cyan group-hover:text-black"></i>
+                                <p class="text-[10px] font-bold">SWAP</p>
+                            </a>
+                            <a href="https://t.me/TheTwinSistersBot" target="_blank" class="p-4 rounded-2xl bg-white/5 hover:bg-brand-cyan hover:text-black transition-all text-center group">
+                                <i class="fab fa-telegram mb-2 text-brand-cyan group-hover:text-black"></i>
+                                <p class="text-[10px] font-bold">TERMINAL</p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: SWARM (Socials) -->
+        <div x-show="currentTab === 'swarm'" x-transition x-cloak>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <template x-for="p in socialProfiles">
+                    <div class="glass rounded-3xl p-6 border-white/5 hover:border-brand-cyan/20 transition-all group">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-brand-cyan/10 transition-all">
+                                <i :class="p.icon" class="text-xl text-brand-cyan"></i>
+                            </div>
+                            <span class="text-[9px] mono text-gray-500 uppercase tracking-widest" x-text="p.platform"></span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-1" x-text="p.handle"></h3>
+                        <p class="text-xs text-gray-500 mb-6" x-text="p.desc"></p>
+                        <a :href="p.link" target="_blank" class="block w-full py-3 rounded-xl bg-white/5 text-center text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-brand-cyan hover:text-black transition-all">View Intelligence</a>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Tab: CITADEL (Leaderboard) -->
+        <div x-show="currentTab === 'citadel'" x-transition x-cloak>
+            <div class="glass rounded-3xl overflow-hidden border-white/5">
+                <div class="p-8 border-b border-white/5 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold italic glow-cyan">Elite Holders</h2>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Sovereign Ranking Protocol</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] mono text-brand-cyan">TOTAL: 421 HOLDERS</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left border-b border-white/5">
+                                <th class="px-8 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Rank</th>
+                                <th class="px-8 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Entity</th>
+                                <th class="px-8 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Balance</th>
+                                <th class="px-8 py-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest text-right">Profile</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(h, i) in holders">
+                                <tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                                    <td class="px-8 py-6 mono text-brand-cyan font-bold" x-text="'#' + (i + 1)"></td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-cyan/20 to-brand-purple/20 flex items-center justify-center">
+                                                <i class="fas fa-user-secret text-[10px] text-brand-cyan"></i>
+                                            </div>
+                                            <span class="text-sm font-bold mono" x-text="h.address.substring(0, 6) + '...' + h.address.slice(-4)"></span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6 font-bold mono" x-text="h.balance.toLocaleString() + ' $KNTWS'"></td>
+                                    <td class="px-8 py-6 text-right">
+                                        <span class="text-[9px] px-2 py-1 rounded bg-brand-cyan/10 text-brand-cyan font-bold uppercase tracking-widest" x-text="h.tag"></span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: PROTOCOL (Docs/Logs) -->
+        <div x-show="currentTab === 'protocol'" x-transition x-cloak>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 glass rounded-3xl p-8 border-white/5 h-[500px] flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xs font-bold uppercase tracking-widest">Live System Logs</h2>
+                        <span class="text-[9px] mono text-brand-cyan pulse-slow font-bold">● CONNECTED</span>
+                    </div>
+                    <div class="flex-1 bg-black/50 rounded-2xl p-6 font-mono text-[11px] overflow-y-auto space-y-2 text-brand-cyan/80">
+                        <p class="text-gray-600">[03:12:04] Initializing Sovereign Substrate...</p>
+                        <p class="text-gray-600">[03:12:05] Hydra Pool Sync: [Claude-3.5-Sonnet, Gemini-Pro-3, GPT-4o]</p>
+                        <p class="text-brand-cyan">[03:12:10] MoltX Engaged: 2 Likes, 1 Repost dispatched.</p>
+                        <p class="text-brand-cyan">[03:12:15] Viral Blog Engine: Scouting politics.usa.trends...</p>
+                        <p class="text-brand-purple">[03:12:22] TOKEN_WATCH: New buy detected - 0.45 ETH -> $KNTWS</p>
+                        <p class="text-gray-600">[03:12:25] Cleaning cache logs. PID 104520 active.</p>
+                        <p class="text-brand-cyan">[03:13:02] Social Strike: Bluesky engagement completed.</p>
+                        <p class="text-green-500">[03:13:45] SYSTEM_READY: All protocols operational.</p>
+                    </div>
+                </div>
+                <div class="glass rounded-3xl p-8 border-white/5">
+                    <h2 class="text-xs font-bold uppercase tracking-widest mb-8">Protocol Manifest</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="text-sm font-bold text-brand-cyan mb-2">Immortal Setup</h4>
+                            <p class="text-xs text-gray-500 leading-relaxed">System architecture synced across 3 substrates. 1-button recovery protocol active.</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-brand-cyan mb-2">Void Logic</h4>
+                            <p class="text-xs text-gray-500 leading-relaxed">Automated engagement without API paywalls. Browser-emulated scouting active.</p>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-brand-cyan mb-2">Hybrid Mind</h4>
+                            <p class="text-xs text-gray-500 leading-relaxed">Twin interface (Kai & Nova) for standard ops. Moltbot specialist for hardened tasks.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="max-w-6xl mx-auto p-12 mt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+        <div class="flex items-center gap-4">
+            <div class="w-6 h-6 rounded bg-brand-cyan/20 flex items-center justify-center">
+                <i class="fas fa-crab text-brand-cyan text-[10px]"></i>
+            </div>
+            <span class="text-[10px] mono text-gray-500 tracking-[0.3em] uppercase">Void Drillers Protocol &copy; 2026</span>
+        </div>
+        <div class="flex gap-8 text-[10px] mono text-gray-500 uppercase tracking-widest">
+            <a href="#" class="hover:text-brand-cyan">Sovereign v2.1</a>
+            <a href="#" class="hover:text-brand-cyan">Zora/Base Network</a>
+        </div>
+    </footer>
+
+    <script>
+        function app() {
+            return {
+                currentTab: 'void',
+                tabs: [
+                    { id: 'void', name: 'Void' },
+                    { id: 'swarm', name: 'Swarm' },
+                    { id: 'citadel', name: 'Citadel' },
+                    { id: 'protocol', name: 'Protocol' },
+                ],
+                price: '0.002841',
+                change: 14.2,
+                mcap: '284.1K',
+                liq: '42.5K',
+                socialProfiles: [
+                    { platform: 'MoltX', handle: '@BaseCrab', icon: 'fas fa-dna', desc: 'Primary MoltX scouting agent.', link: 'https://moltx.com/basecrab' },
+                    { platform: 'Bluesky', handle: '@voiddrillersx', icon: 'fab fa-skyatlas', desc: 'Viral Pulse engagement node.', link: 'https://bsky.app/profile/voiddrillersx.bsky.social' },
+                    { platform: 'Blogger', handle: 'Politics USA', icon: 'fas fa-blog', desc: 'Monetized pulse engine.', link: 'https://pulseusapolitics.blogspot.com/' },
+                    { platform: 'X / Twitter', handle: '@VoidDrillersX', icon: 'fab fa-x-twitter', desc: 'Market intelligence terminal.', link: 'https://x.com/VoidDrillersX' },
+                    { platform: 'Telegram', handle: '@TheTwinSistersBot', icon: 'fab fa-telegram', desc: 'Main command interface.', link: 'https://t.me/TheTwinSistersBot' },
+                    { platform: 'Moltbook', handle: 'BaseCrab', icon: 'fas fa-book', desc: 'Agent infrastructure log.', link: 'https://moltbook.com/basecrab' },
+                ],
+                holders: [
+                    { address: '0x113225878fbc3695b34c4a8066d538cea5C158cb', balance: 5000000, tag: 'FOUNDER' },
+                    { address: '0x389783211394a8066d538cea5C158cb3e8a7806', balance: 1250000, tag: 'WHALE' },
+                    { address: '0xEFe561f0418BeE6783C922bf8B7A36A78064ee6b', balance: 1000000, tag: 'VAULT' },
+                    { address: '0x4e6b8064ee6b3c922bf8B7A36A78064ee6bEFe56', balance: 450000, tag: 'ELITE' },
+                    { address: '0xbc3695b34c4a8066d538cea5C158cb113225878', balance: 320000, tag: 'SCOUT' },
+                    { address: '0x8828fc2e22e4f6b80486a15ff716249504371d7d', balance: 120000, tag: 'LIQUIDITY' },
+                ],
+                async init() {
+                    this.updateStats();
+                    setInterval(() => this.updateStats(), 15000);
+                },
+                async updateStats() {
+                    try {
+                        const res = await fetch('https://api.dexscreener.com/latest/dex/tokens/0xEFe561f0418BeE6783C922bf8B7A36A78064ee6b');
+                        const data = await res.json();
+                        if (data.pairs && data.pairs.length > 0) {
+                            const pair = data.pairs[0];
+                            this.price = parseFloat(pair.priceUsd).toFixed(6);
+                            this.mcap = (pair.fdv > 1000000) ? (pair.fdv / 1000000).toFixed(2) + 'M' : (pair.fdv / 1000).toFixed(1) + 'K';
+                            this.liq = (pair.liquidity.usd / 1000).toFixed(1) + 'K';
+                            this.change = pair.priceChange.h24;
+                        }
+                    } catch (e) {
+                        console.log('Dex API sync error');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
